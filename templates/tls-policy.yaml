@@ -1,0 +1,15 @@
+apiVersion: kuadrant.io/v1
+kind: TLSPolicy
+metadata:
+  name: {{ .Values.gateway.name }}-tls
+  namespace: {{ .Values.gateway.namespace }}
+spec:
+  targetRef:
+    name: {{ .Values.gateway.name }}
+    group: gateway.networking.k8s.io
+    kind: Gateway
+  issuerRef:
+    group: cert-manager.io
+    kind: ClusterIssuer
+    name: self-signed
+  commonName: {{ .Values.gateway.name }}

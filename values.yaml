@@ -1,0 +1,5 @@
+gateway:
+  name: gateway
+  namespace: kuadrant-system
+  hostname: api.test.csn.se
+  issuer: kuadrant
