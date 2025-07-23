@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GATEWAY_NAME=${1:-gateway}
-NAMESPACE=${2:-kuadrant-system}
+NAMESPACE=${2:-api-gateway}
 SECRET_NAME=${3:-api-gateway-tls}
 HOSTNAME=${5:-api.test.csn.se}
 
@@ -17,7 +17,7 @@ export INGRESS_HOST=$(oc get gtw $GATEWAY_NAME -n $NAMESPACE -o jsonpath='{.stat
 echo "INGRESS_HOST: $INGRESS_HOST"
 
 # Test the /cars endpoint on the Gateway's external address using the fetched CA cert and correct Host header
-curl -vs --cacert "$CA_FILE" --resolve $HOSTNAME:443:$INGRESS_HOST "https://$HOSTNAME/cars"
+curl -s -v --cacert "$CA_FILE" --resolve $HOSTNAME:443:$INGRESS_HOST "https://$HOSTNAME/cars"
 
 # Clean up the temporary directory
 rm -rf "$TMPDIR"

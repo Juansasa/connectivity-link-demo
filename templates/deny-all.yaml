@@ -1,7 +1,7 @@
 apiVersion: kuadrant.io/v1
 kind: AuthPolicy
 metadata:
-  name: {{ .Values.gateway.name }}-auth
+  name: {{ .Values.gateway.name }}-deny-auth
   namespace: {{ .Values.gateway.namespace }}
 spec:
   targetRef:
