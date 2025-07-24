@@ -1,5 +1,19 @@
-gateway:
-  name: gateway
-  namespace: api-gateway
-  hostname: api.test.csn.se
-  issuer: kuadrant
+gateways:
+  - name: node-api
+    namespace: api-gateway
+    rootDomain: apps.r5ftk5n2q.stakater.cloud
+    routes:
+      - name: node-api
+        namespace: node-api
+        rules:
+          - backendRefs:
+              - group: ''
+                kind: Service
+                name: node-api
+                namespace: node-api
+                port: 8080
+                weight: 1
+            matches:
+              - path:
+                  type: PathPrefix
+                  value: /

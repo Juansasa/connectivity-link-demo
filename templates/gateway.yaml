@@ -1,17 +1,18 @@
+{{- range .Values.gateways }}
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ .Values.gateway.name }}
-  namespace: {{ .Values.gateway.namespace }}
+  name: {{ .name }}
+  namespace: {{ .namespace }}
   labels:
     kuadrant.io/gateway: "true"
 spec:
-    gatewayClassName: istio
-    listeners:
+  gatewayClassName: istio
+  listeners:
     - allowedRoutes:
         namespaces:
           from: All
-      hostname: "{{ .Values.gateway.hostname }}"
+      hostname: "*.{{ .rootDomain }}"
       name: api
       port: 443
       protocol: HTTPS
@@ -19,5 +20,7 @@ spec:
         certificateRefs:
         - group: ""
           kind: Secret
-          name: api-{{ .Values.gateway.name }}-tls
+          name: api-{{ .name }}-tls
         mode: Terminate
+---
+{{- end }}

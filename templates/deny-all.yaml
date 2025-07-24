@@ -1,21 +1,25 @@
+{{- range .Values.gateways }}
 apiVersion: kuadrant.io/v1
 kind: AuthPolicy
 metadata:
-  name: {{ .Values.gateway.name }}-deny-auth
-  namespace: {{ .Values.gateway.namespace }}
+  name: {{ .name }}-deny-auth
+  namespace: {{ .namespace }}
 spec:
   targetRef:
     group: gateway.networking.k8s.io
     kind: Gateway
-    name: {{ .Values.gateway.name }}
+    name: {{ .name }}
   defaults:
    when:
      - predicate: "request.path != '/health'"
    rules:
     authorization:
       deny-all:
-        opa:
-          rego: "allow = false"
+       metrics: false
+       opa:
+         allValues: false
+         rego: allow = false
+       priority: 0
     response:
       unauthorized:
         headers:
@@ -27,3 +31,5 @@ spec:
               "error": "Forbidden",
               "message": "Access denied by default by the gateway operator. If you are the administrator of the service, create a specific auth policy for the route."
             }
+---
+{{- end }}

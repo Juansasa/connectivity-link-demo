@@ -1,9 +1,9 @@
 #!/bin/bash
 
-GATEWAY_NAME=${1:-gateway}
+GATEWAY_NAME=${1:-node-api}
 NAMESPACE=${2:-api-gateway}
-SECRET_NAME=${3:-api-gateway-tls}
-HOSTNAME=${5:-api.test.csn.se}
+SECRET_NAME=${3:-api-${GATEWAY_NAME}-tls}
+HOSTNAME=${5:-node-api-${NAMESPACE}.apps.r5ftk5n2q.stakater.cloud}
 
 # Create a temporary directory for the certs
 TMPDIR=$(mktemp -d)
@@ -17,7 +17,7 @@ export INGRESS_HOST=$(oc get gtw $GATEWAY_NAME -n $NAMESPACE -o jsonpath='{.stat
 echo "INGRESS_HOST: $INGRESS_HOST"
 
 # Test the /cars endpoint on the Gateway's external address using the fetched CA cert and correct Host header
-curl -s -v --cacert "$CA_FILE" --resolve $HOSTNAME:443:$INGRESS_HOST "https://$HOSTNAME/cars"
+curl -kv --cacert "$CA_FILE" "https://$HOSTNAME/books"
 
 # Clean up the temporary directory
 rm -rf "$TMPDIR"

@@ -2,5 +2,5 @@ kind: Kuadrant
 apiVersion: kuadrant.io/v1beta1
 metadata:
   name: kuadrant
-  namespace: {{ .Values.gateway.namespace }}
+  namespace: kuadrant-system
 spec: {}
