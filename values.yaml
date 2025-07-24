@@ -4,8 +4,6 @@ gateways:
     rootDomain: apps.r5ftk5n2q.stakater.cloud
     jwt:
       issuerUrl: https://keycloak-keycloak.apps.r5ftk5n2q.stakater.cloud/realms/kuadrant
-      audiences:
-        - csn-api-test
     routes:
       - name: admin
         namespace: toystore
