@@ -1,0 +1,19 @@
+{{- range $gateway := .Values.gateways }}
+  {{- range $route := $gateway.routes }}
+    {{- if $route.rateLimit }}
+---
+apiVersion: kuadrant.io/v1
+kind: RateLimitPolicy
+metadata:
+  name: {{ $route.name }}-ratelimit
+  namespace: {{ $route.namespace | default $gateway.namespace }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ $route.name }}
+  limits:
+{{ toYaml $route.rateLimit | indent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

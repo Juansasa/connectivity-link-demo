@@ -1,19 +1,68 @@
 gateways:
-  - name: node-api
+  - name: toystore
     namespace: api-gateway
     rootDomain: apps.r5ftk5n2q.stakater.cloud
     routes:
-      - name: node-api
-        namespace: node-api
+      - name: admin
+        namespace: toystore
+        apiKeys:
+          - name: jennifer
+            group: admin
+            key: thisisadminkey
+        rateLimit:
+          "post":
+            rates:
+            - limit: 2
+              window: 30s
+            counters:
+            - expression: "auth.identity.username"
+            when:
+            - predicate: "request.method == 'GET'"
+            - predicate: "request.path == '/admin/toy'"
+            - predicate: "auth.identity.group == 'admin'"
+          "delete":
+            rates:
+            - limit: 2
+              window: 30s
+            counters:
+            - expression: "auth.identity.username"
+            when:
+            - predicate: "request.method == 'DELETE'"
+            - predicate: "request.path == '/admin/toy'"
+            - predicate: "auth.identity.group == 'admin'"
         rules:
-          - backendRefs:
-              - group: ''
-                kind: Service
-                name: node-api
-                namespace: node-api
-                port: 8080
-                weight: 1
-            matches:
-              - path:
-                  type: PathPrefix
-                  value: /
+          - matches:
+            - path:
+                type: Exact
+                value: "/admin/toy"
+              method: POST
+            - path:
+                type: Exact
+                value: "/admin/toy"
+              method: DELETE
+            backendRefs:
+              - name: toystore
+                port: 80
+      - name: toy
+        namespace: toystore
+        rateLimit:
+          "global":
+            rates:
+            - limit: 6
+              window: 30s
+          "get-toy":
+            when:
+            - predicate: "request.method == 'GET'"
+            - predicate: "request.path == '/toy'"
+            rates:
+            - limit: 5
+              window: 1m
+        rules:
+          - matches:
+            - path:
+                type: PathPrefix
+                value: "/toy"
+              method: GET
+            backendRefs:
+              - name: toystore
+                port: 80
