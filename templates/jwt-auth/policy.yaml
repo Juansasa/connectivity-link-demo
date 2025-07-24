@@ -1,0 +1,62 @@
+{{- range $gateway := .Values.gateways }}
+  {{- if $gateway.jwt }}
+---
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: {{ $gateway.name }}-jwt
+  namespace: {{ $gateway.namespace }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: {{ $gateway.name }}
+  rules:
+    authentication:
+      "oidc":
+        jwt:
+          issuerUrl: {{ $gateway.jwt.issuerUrl }}
+          {{- if $gateway.jwt.audiences }}
+          audiences:
+          {{- if kindIs "string" $gateway.jwt.audiences }}
+            - {{ $gateway.jwt.audiences }}
+          {{- else }}
+            {{- range $aud := $gateway.jwt.audiences }}
+              - {{ $aud }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
+    authorization:
+      "access-claims":
+        opa:
+          rego: |
+            package authorino
+            
+            import rego.v1
+            
+            gateway := "{{ $gateway.name }}"
+            route := trim(input.context.request.http.path, "/")
+            allowed_routes := input.auth.identity.allowed_routes
+            
+            allow if {
+                gateway
+                allowed_routes
+                sprintf("%s:*", [gateway]) in allowed_routes
+            }
+            
+            allow if {
+                gateway
+                route
+                allowed_routes
+                sprintf("%s:%s", [gateway, route]) in allowed_routes
+            }
+    response:
+      success:
+        filters:
+          "identity":
+            json:
+              properties:
+                "userid":
+                  selector: auth.identity.sub
+  {{- end }}
+{{- end }}

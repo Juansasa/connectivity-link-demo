@@ -16,8 +16,11 @@ oc get secret "$SECRET_NAME" -n "$NAMESPACE" -o jsonpath='{.data.ca\.crt}' | bas
 export INGRESS_HOST=$(oc get gtw $GATEWAY_NAME -n $NAMESPACE -o jsonpath='{.status.addresses[0].value}')
 echo "INGRESS_HOST: $INGRESS_HOST"
 
+# Get the token from the keycloak
+export JWT_TOKEN=$(curl -s -X POST 'https://keycloak-keycloak.apps.r5ftk5n2q.stakater.cloud/realms/kuadrant/protocol/openid-connect/token' -H 'Content-Type: application/x-www-form-urlencoded' -d 'grant_type=password' -d 'client_id=csn-api-test' -d 'username=jane' -d 'password=p' | jq -r .access_token)
+
 # Test the /cars endpoint on the Gateway's external address using the fetched CA cert and correct Host header
-curl -s -v --cacert "$CA_FILE" "https://$HOSTNAME/toy"
+curl -s -v --cacert "$CA_FILE" "https://$HOSTNAME/toy" -H "Authorization: Bearer $JWT_TOKEN"
 
 # Clean up the temporary directory
 rm -rf "$TMPDIR"
