@@ -6,23 +6,29 @@
 
 ## JWT Claims for Gateway and Route Authorization
 
-This chart supports fine-grained access control using JWT claims. You can control which gateways and routes a user can access by including an `allowed_routes` claim in their JWT. The policy logic supports both wildcard and comma-separated route lists for maximum flexibility.
+This chart supports fine-grained access control using JWT claims. You can control which requests a user can access by including an `allowed_routes` claim in their JWT. The policy logic supports wildcards for maximum flexibility.
 
 ### Claim Structure
 
-- **Wildcard access:**
-  - `toystore:*` grants access to all routes in the `toystore` gateway.
-- **Comma-separated list:**
-  - `toystore:admin,toy,cashout` grants access only to the `admin`, `toy`, and `cashout` routes in the `toystore` gateway.
-- **Multiple gateways:**
-  - You can include multiple entries for different gateways.
+The `allowed_routes` claim uses the following format:
+
+```
+{method}:{host}{path}
+```
+
+- `method`: HTTP method (e.g., GET, POST, DELETE, *)
+- `host`: Hostname (e.g., api.example.com, *, etc.)
+- `path`: Path (e.g., /admin, /api/v1/resource, /*, etc.)
 
 #### Example JWT Payload
 ```json
 {
   "allowed_routes": [
-    "toystore:*",
-    "payments:checkout,refund"
+    "GET:*/*",
+    "POST:api.example.com/admin",
+    "DELETE:*/*",
+    "*:test.com/admin/toy",
+    "POST:*/admin"
   ]
 }
 ```
@@ -31,21 +37,23 @@ This chart supports fine-grained access control using JWT claims. You can contro
 ```json
 {
   "allowed_routes": [
-    "toystore:admin,toy",
-    "payments:checkout"
+    "GET:api.example.com/pets",
+    "POST:api.example.com/pets"
   ]
 }
 ```
 
 ### How the Policy Works
 
-The policy template checks the `allowed_routes` claim for an entry matching the current gateway. It allows access if:
-- The entry is a wildcard (e.g., `toystore:*`), or
-- The current route is listed in the comma-separated list (e.g., `toystore:admin,toy` and the route is `admin` or `toy`).
+The policy checks the `allowed_routes` claim for an entry matching the current request. It allows access if:
+- The method, host, and path match exactly, or
+- Any of the fields use a wildcard (`*`), or
+- The path uses a glob pattern (e.g., `/admin/*`)
 
 ### Best Practices
-- Use `gateway:*` for admin or power users.
-- Use `gateway:route1,route2` for users with limited access.
+- Use `*:*/*` for admin or power users (allow everything).
+- Use `GET:*/*` for read-only users.
+- Use specific method/host/path for limited access.
 - Issue JWTs with the appropriate `allowed_routes` claim for each user or client.
 
 ## Setting Up Keycloak for JWT-based Gateway and Route Authorization
@@ -91,7 +99,8 @@ The policy template checks the `allowed_routes` claim for an entry matching the 
   - **Mapper Type:** `User Attribute`
   - **User Attribute:** `allowed_routes`
   - **Token Claim Name:** `allowed_routes`
-  - **Claim JSON Type:** `String` or `JSON`
+  - **Claim JSON Type:** `JSON` (must be set to JSON for multi-valued array)
+  - **Multivalued:** ON (ensure this is checked so the claim is an array, not a single string)
   - **Add to ID token** and **Add to access token:** ON
 
 ### 5. Assign Claims to Users
@@ -101,8 +110,8 @@ The policy template checks the `allowed_routes` claim for an entry matching the 
   - **Value:**
     ```
     [
-      "toystore:*",
-      "payments:checkout,refund"
+      "GET:*/*",
+      "POST:api.example.com/admin"
     ]
     ```
   - (Or use the structure you want for your access control.)
@@ -127,3 +136,62 @@ The policy template checks the `allowed_routes` claim for an entry matching the 
 - Use Keycloak groups or roles to automate claim assignment for many users.
 - Use Keycloak’s built-in mappers to transform group/role membership into claims.
 - Regularly review and audit user claims for security.
+
+## Fetching a JWT Token for API Access
+
+To use JWT authentication with the gateway, you need to obtain a valid access token from Keycloak. You can do this either as a user (Resource Owner Password Credentials Grant) or as a service account (Client Credentials Grant).
+
+### 1. Fetching a Token as a User
+
+Use the following curl command to obtain a token for a user:
+
+```bash
+curl -X POST 'https://<keycloak-host>/realms/<realm>/protocol/openid-connect/token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=password' \
+  -d 'client_id=<client_id>' \
+  -d 'username=<username>' \
+  -d 'password=<password>'
+```
+
+- Replace `<keycloak-host>`, `<realm>`, `<client_id>`, `<username>`, and `<password>` with your actual values.
+- The response will include an `access_token` field. Use this value as your Bearer token in API requests.
+
+### 2. Fetching a Token as a Service Account (Client Credentials)
+
+If you have a client configured with service accounts enabled, you can fetch a token using:
+
+```bash
+curl -X POST 'https://<keycloak-host>/realms/<realm>/protocol/openid-connect/token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=client_credentials' \
+  -d 'client_id=<client_id>' \
+  -d 'client_secret=<client_secret>'
+```
+
+- Replace `<client_secret>` with your client's secret.
+- The response will include an `access_token` field.
+
+### 3. Using the Token
+
+Include the token in the `Authorization` header of your API requests:
+
+```bash
+curl -H "Authorization: Bearer <access_token>" https://<api-endpoint>
+```
+
+### 4. (Optional) Fetching an Offline Token for Long-Lived Access
+
+To obtain a refresh token for long-lived or offline access, add the `scope=offline_access` parameter:
+
+```bash
+curl -X POST 'https://<keycloak-host>/realms/<realm>/protocol/openid-connect/token' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=password' \
+  -d 'client_id=<client_id>' \
+  -d 'username=<username>' \
+  -d 'password=<password>' \
+  -d 'scope=offline_access'
+```
+
+This will return a `refresh_token` you can use to obtain new access tokens without re-authenticating.

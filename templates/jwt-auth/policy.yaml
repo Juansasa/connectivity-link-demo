@@ -20,7 +20,7 @@ spec:
       "access-claims":
         opa:
           rego: |
-{{ .Files.Get "files/authorino_allowed_routes.rego" | indent 12 }}
+{{ $.Files.Get "files/authorino_allowed_routes.rego" | indent 12 }} 
     response:
       success:
         filters:
