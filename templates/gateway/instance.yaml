@@ -1,9 +1,8 @@
-{{- range .Values.gateways }}
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ .name }}
-  namespace: {{ .namespace }}
+  name: {{ .Values.gateway.name }}
+  namespace: {{ .Values.gateway.namespace }}
   labels:
     kuadrant.io/gateway: "true"
 spec:
@@ -12,7 +11,7 @@ spec:
     - allowedRoutes:
         namespaces:
           from: All
-      hostname: "*.{{ .rootDomain }}"
+      hostname: "*.{{ .Values.gateway.rootDomain }}"
       name: api
       port: 443
       protocol: HTTPS
@@ -20,7 +19,6 @@ spec:
         certificateRefs:
         - group: ""
           kind: Secret
-          name: api-{{ .name }}-tls
+          name: api-{{ .Values.gateway.name }}-tls
         mode: Terminate
----
-{{- end }}
+

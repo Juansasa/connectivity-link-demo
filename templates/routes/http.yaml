@@ -1,5 +1,5 @@
-{{- range $gateway := .Values.gateways }}
-  {{- range $route := $gateway.routes }}
+{{- range $route := .Values.gateway.routes }}
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -7,12 +7,10 @@ metadata:
   namespace: {{ $route.namespace }}
 spec:
   parentRefs:
-  - name: {{ $gateway.name }}
-    namespace: {{ $gateway.namespace }}
+  - name: {{ $.Values.gateway.name }}
+    namespace: {{ $.Values.gateway.namespace }}
   hostnames:
-  - "{{ $route.name }}-{{ $gateway.namespace }}.{{ $gateway.rootDomain }}"
+  - "{{ $route.name }}-{{ $.Values.gateway.namespace }}.{{ $.Values.gateway.rootDomain }}"
   rules:
 {{ toYaml $route.rules | indent 4 }}
----
-  {{- end }}
 {{- end }}

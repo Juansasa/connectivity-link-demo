@@ -1,26 +1,24 @@
-{{- range $gateway := .Values.gateways }}
-  {{- if $gateway.jwt }}
----
+{{- if .Values.gateway.jwt }}
 apiVersion: kuadrant.io/v1
 kind: AuthPolicy
 metadata:
-  name: {{ $gateway.name }}-jwt
-  namespace: {{ $gateway.namespace }}
+  name: {{ .Values.gateway.name }}-jwt
+  namespace: {{ .Values.gateway.namespace }}
 spec:
   targetRef:
     group: gateway.networking.k8s.io
     kind: Gateway
-    name: {{ $gateway.name }}
+    name: {{ .Values.gateway.name }}
   rules:
     authentication:
       "oidc":
         jwt:
-          issuerUrl: {{ $gateway.jwt.issuerUrl }}
+          issuerUrl: {{ .Values.gateway.jwt.issuerUrl }}
     authorization:
       "access-claims":
         opa:
           rego: |
-{{ $.Files.Get "files/authorino_allowed_routes.rego" | indent 12 }} 
+{{ .Files.Get "files/authorino_allowed_routes.rego" | indent 12 }} 
     response:
       success:
         filters:
@@ -29,5 +27,4 @@ spec:
               properties:
                 "userid":
                   selector: auth.identity.sub
-  {{- end }}
 {{- end }}

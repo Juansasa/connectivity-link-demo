@@ -1,10 +1,10 @@
-gateways:
-  - name: toystore
-    namespace: api-gateway
-    rootDomain: apps.r5ftk5n2q.stakater.cloud
-    jwt:
-      issuerUrl: https://keycloak-keycloak.apps.r5ftk5n2q.stakater.cloud/realms/kuadrant
-    routes:
+gateway:
+  name: toystore
+  namespace: api-gateway
+  rootDomain: apps.r5ftk5n2q.stakater.cloud
+  jwt:
+    issuerUrl: https://keycloak-keycloak.apps.r5ftk5n2q.stakater.cloud/realms/kuadrant
+  routes:
       - name: admin
         namespace: toystore
         rateLimit:

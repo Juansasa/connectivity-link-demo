@@ -1,15 +1,15 @@
-{{- range $gateway := .Values.gateways }}
-  {{- range $route := $gateway.routes }}
+{{- range $route := .Values.gateway.routes }}
+---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: {{ $route.name }}
-  namespace: {{ $gateway.namespace }}
+  namespace: {{ $.Values.gateway.namespace }}
 spec:
-  host: {{ $route.name }}-{{ $gateway.namespace }}.{{ $gateway.rootDomain }}
+  host: {{ $route.name }}-{{ $.Values.gateway.namespace }}.{{ $.Values.gateway.rootDomain }}
   to:
     kind: Service
-    name: {{ $gateway.name }}-istio
+    name: {{ $.Values.gateway.name }}-istio
     weight: 100
   port:
     targetPort: api
@@ -17,6 +17,4 @@ spec:
     termination: passthrough
     insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None
----
-  {{- end }}
 {{- end }}
