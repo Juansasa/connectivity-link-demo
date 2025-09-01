@@ -5,6 +5,8 @@ metadata:
   namespace: {{ .Values.gateway.namespace }}
   labels:
     kuadrant.io/gateway: "true"
+  annotations:
+    networking.istio.io/service-type: NodePort
 spec:
   gatewayClassName: istio
   listeners:

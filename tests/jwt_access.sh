@@ -3,9 +3,14 @@
 GATEWAY_NAME=${1:-toystore}
 NAMESPACE=${2:-api-gateway}
 SECRET_NAME=${3:-api-${GATEWAY_NAME}-tls}
-HOSTNAME=${5:-toy-${NAMESPACE}.apps.r5ftk5n2q.stakater.cloud}
-HOSTNAME_ADMIN=${5:-admin-${NAMESPACE}.apps.r5ftk5n2q.stakater.cloud}
-KEYCLOAK_URL="https://keycloak-keycloak.apps.r5ftk5n2q.stakater.cloud/realms/kuadrant/protocol/openid-connect/token"
+HOSTNAME=${5:-toy-${NAMESPACE}.apps.ocpinfra01.csni.se}
+HOSTNAME_ADMIN=${5:-admin-${NAMESPACE}.apps.ocpinfra01.csni.se}
+
+## JWT auth details
+KEYCLOAK_URL="https://sso.intern.st1.csni.se/realms/connectivity-link/protocol/openid-connect/token"
+KEYCLOAK_CLIENT="api-gateway"
+USER="jane"
+PASSWORD="test123"
 
 # Create a temporary directory for the certs
 TMPDIR=$(mktemp -d)
@@ -22,10 +27,11 @@ echo "INGRESS_HOST: $INGRESS_HOST"
 export JWT_TOKEN=$(curl -s -X POST "$KEYCLOAK_URL" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'grant_type=password' \
-  -d 'client_id=csn-api-test' \
-  -d 'username=jane' \
-  -d 'password=p' | jq -r .access_token)
+  -d "client_id=$KEYCLOAK_CLIENT" \
+  -d "username=$USER" \
+  -d "password=$PASSWORD" | jq -r .access_token)
 
+echo "token: $JWT_TOKEN"
 PATH_NAME="/toy"
 curl -s -o /dev/null -w "%{http_code}:https://$HOSTNAME$PATH_NAME\n" \
   --cacert "$CA_FILE" \
