@@ -7,7 +7,7 @@ HOSTNAME=${5:-toy-${NAMESPACE}.apps.ocpinfra01.csni.se}
 HOSTNAME_ADMIN=${5:-admin-${NAMESPACE}.apps.ocpinfra01.csni.se}
 
 ## JWT auth details
-KEYCLOAK_URL="https://sso.intern.st1.csni.se/realms/connectivity-link/protocol/openid-connect/token"
+KEYCLOAK_URL="http://keycloak.keycloak.svc.cluster.local:8080/realms/kuadrant/protocol/openid-connect/token"
 KEYCLOAK_CLIENT="api-gateway"
 USER="alice"
 PASSWORD="test123"
@@ -32,6 +32,7 @@ export JWT_TOKEN=$(curl -s -X POST "$KEYCLOAK_URL" \
   -d "password=$PASSWORD" | jq -r .access_token)
 
 echo "token: $JWT_TOKEN"
+
 PATH_NAME="/toy"
 curl -s -o /dev/null -w "%{http_code}:https://$HOSTNAME$PATH_NAME\n" \
   --cacert "$CA_FILE" \

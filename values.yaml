@@ -3,7 +3,7 @@ gateway:
   namespace: api-gateway
   rootDomain: apps.ocpinfra01.csni.se
   jwt:
-    issuerUrl: https://sso.intern.st1.csni.se/realms/connectivity-link
+    issuerUrl: http://keycloak.keycloak.svc.cluster.local:8080/realms/kuadrant
   routes:
       - name: admin
         namespace: toystore
