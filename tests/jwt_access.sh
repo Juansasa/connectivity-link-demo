@@ -9,7 +9,7 @@ HOSTNAME_ADMIN=${5:-admin-${NAMESPACE}.apps.ocpinfra01.csni.se}
 ## JWT auth details
 KEYCLOAK_URL="https://sso.intern.st1.csni.se/realms/connectivity-link/protocol/openid-connect/token"
 KEYCLOAK_CLIENT="api-gateway"
-USER="jane"
+USER="alice"
 PASSWORD="test123"
 
 # Create a temporary directory for the certs

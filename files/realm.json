@@ -2219,6 +2219,48 @@
   },
   "keycloakVersion": "22.0.5",
   "userManagedAccessAllowed": true,
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Alice",
+      "lastName": "Wonder",
+      "email": "alice@example.com",
+      "attributes": {
+        "allowed_routes": [
+          "GET:admin/*"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Builder",
+      "email": "bob@example.com",
+      "attributes": {
+        "allowed_routes": [
+          "GET:toy/*"
+        ]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "test123",
+          "temporary": false
+        }
+      ]
+    }
+  ],
   "clientProfiles": {
     "profiles": []
   },
