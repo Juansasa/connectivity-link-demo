@@ -7,7 +7,7 @@ HOSTNAME=${5:-toy-${NAMESPACE}.apps.ocpinfra01.csni.se}
 HOSTNAME_ADMIN=${5:-admin-${NAMESPACE}.apps.ocpinfra01.csni.se}
 
 ## JWT auth details
-KEYCLOAK_URL="http://keycloak.keycloak.svc.cluster.local:8080/realms/kuadrant/protocol/openid-connect/token"
+KEYCLOAK_URL="https://keycloak-keycloak.apps.ocpinfra01.csni.se/realms/kuadrant/protocol/openid-connect/token"
 KEYCLOAK_CLIENT="api-gateway"
 USER="alice"
 PASSWORD="test123"
@@ -25,8 +25,7 @@ echo "INGRESS_HOST: $INGRESS_HOST"
 
 # Get the token from the keycloak for Jane
 export JWT_TOKEN=$(curl -s -X POST "$KEYCLOAK_URL" \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'grant_type=password' \
+  -s -d 'grant_type=password' \
   -d "client_id=$KEYCLOAK_CLIENT" \
   -d "username=$USER" \
   -d "password=$PASSWORD" | jq -r .access_token)
