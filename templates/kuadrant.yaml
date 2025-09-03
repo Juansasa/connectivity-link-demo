@@ -3,4 +3,6 @@ apiVersion: kuadrant.io/v1beta1
 metadata:
   name: kuadrant
   namespace: kuadrant-system
-spec: {}
+spec:
+  observability:
+    enable: true
