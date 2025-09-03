@@ -31,19 +31,30 @@ export JWT_TOKEN=$(curl -s -X POST "$KEYCLOAK_URL" \
   -d "password=$PASSWORD" | jq -r .access_token)
 
 echo "token: $JWT_TOKEN"
+printf "\n"
 
+echo "=== Testing GET /toy ==="
 PATH_NAME="/toy"
-curl -s -o /dev/null -w "%{http_code}:https://$HOSTNAME$PATH_NAME\n" \
+echo "Request: GET https://$HOSTNAME$PATH_NAME"
+echo "Headers: Authorization: Bearer $JWT_TOKEN"
+echo "Response:"
+curl -v \
   --cacert "$CA_FILE" \
   "https://$HOSTNAME$PATH_NAME" \
-  -H "Authorization: Bearer $JWT_TOKEN"
+  -H "Authorization: Bearer $JWT_TOKEN" 2>&1
+printf "\n\n"
 
+echo "=== Testing DELETE /admin/toy ==="
 PATH_NAME="/admin/toy"
-curl -s -o /dev/null -w "%{http_code}:https://$HOSTNAME_ADMIN$PATH_NAME\n" \
+echo "Request: DELETE https://$HOSTNAME_ADMIN$PATH_NAME"
+echo "Headers: Authorization: Bearer $JWT_TOKEN"
+echo "Response:"
+curl -v \
   -X DELETE \
   --cacert "$CA_FILE" \
   "https://$HOSTNAME_ADMIN$PATH_NAME" \
-  -H "Authorization: Bearer $JWT_TOKEN"
+  -H "Authorization: Bearer $JWT_TOKEN" 2>&1
+printf "\n"
 
 # Clean up the temporary directory
 rm -rf "$TMPDIR"
